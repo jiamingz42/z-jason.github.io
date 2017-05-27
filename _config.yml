@@ -24,9 +24,13 @@ github_username:  z-jason
 
 # Build settings
 markdown: redcarpet
-theme: minima
+#theme: minima
 gems:
   - jekyll-feed
 exclude:
   - Gemfile
   - Gemfile.lock
+
+collections:
+  slides:
+    output: true

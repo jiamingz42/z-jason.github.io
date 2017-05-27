@@ -1,0 +1,14 @@
+---
+layout: default
+title: Slides
+---
+
+<ul>
+    {% for slide in site.slides reversed %}
+        {% if slide.type == 'slide' %}
+        <li>
+            <a href="{{slide.url}}">{{slide.updated_at}} {{ slide.title }}</a>
+        </li>
+        {% endif %}
+    {% endfor %}
+</ul>
