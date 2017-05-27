@@ -1,0 +1,330 @@
+---
+layout: presentation
+title: Option - A Better Way to Handle Null Value
+date: 2017-05-03
+---
+class: center, middle
+
+# {{page.title}}
+
+Jiaming Zhang
+
+{{page.date}}
+
+---
+name:what-is-option
+class: scala-tutorial
+
+## What's Option?
+
+{% raw %}
+{{content}}
+{% endraw %}
+
+.footnote[
+  [Scala Documentation - Option](https://www.scala-lang.org/api/current/scala/Option.html)
+]
+
+---
+template:what-is-option
+
+**Option** represents optional values. Instances of **Option** are 
+either an instance of `scala.Some` or the object `None`
+
+--
+```scala
+def divide(x: Double, y: Double): Option[Double] = 
+  if (y == 0) None else Some(x/y)
+
+divide(4,2) // => Some(2.0)
+divide(4,0) // => None
+```
+
+--
+```scala
+// Map is a Scala built-in class, equivalent to Python's dict
+val phonebook = Map(
+  "Vidar Deòrsa" -> "202-555-0136",
+  "Tito Oluwafunmilayo" -> "202-555-0129"
+)
+
+phonebook.get("Vidar Deòrsa")   // => Some(202-555-0136)
+phonebook.get("Anthony Asbury") // => None
+```
+
+---
+class: scala-tutorial
+name:why-use-option
+
+## Why Use Option instead of Null?
+
+---
+template:why-use-option
+
+# 1. Clearer Function Signiture
+
+--
+```scala
+def listHead[T](xs: List[T]): T = { /* ... */ }
+
+listHead(List("x","y")) // => "x"
+listHead(List(1,2,3))   // => 1
+listHead(List())        // => ???
+
+// Problem
+// - Hard to know what `listHead(List())` returns w/o refering to doc/source code
+// - Some careless user may even overlook such edge case, which leads to the infamous NullPointerException
+```
+--
+
+```scala
+def listHead[T](xs: List[T]): Option[T] = { /* ... */ }
+```
+
+???
+
+**Takeaway**: It's nice to assume your coworker always update or read the
+document. However, if you can make this so obvious by changing the function
+signiture, why not?
+
+---
+template:why-use-option
+
+# 2. Can't Return Null
+
+--
+A function can't return null if its return type is primitive (e.g. integer,
+double). An arbitrary value is usually picked to represent null.
+
+```scala
+def search[T](haystack: Vector[T], needle: T): Int = { /* ... */ }
+
+search(Vector("a", "b"), "a") // => 0
+search(Vector("a", "b"), "x") // => -1
+```
+
+--
+```scala
+def search[T](haystack: Vector[T], needle: T): Option[Int] = { /* ... */ }
+
+search(Vector("a", "b"), "a") // => Some(0)
+search(Vector("a", "b"), "x") // => None
+```
+
+--
+ 
+NOTE: As **-1** is commonly used to represent **NO FOUND**, either approach is
+reasonable. However, the 2nd apporach is more idiomatic in Scala.
+
+---
+template:why-use-option
+
+# 2. Can't Return Null
+
+However, sometimes it's **hard to find** an arbitrary value to represent null.
+
+--
+
+```scala
+def divide(divident: Double, divisor: Double): Double = { /* ... */ }
+
+divide(4,2) // => 2.0
+divide(4,0) // => ???
+```
+
+--
+```scala
+@throws(classOf[java.lang.ArithmeticException])
+def divide(divident: Double, divisor: Double): Double = 
+  if (divisor !=0) divident / divisor
+  else throw new java.lang.ArithmeticException 
+
+// Not ideal as
+// 1) FP discounrages side-effect and throwing exception is a side-effect
+// 2) Exception should only be raised when its' truely exceptional
+```
+
+--
+```scala
+def divide(divident: Double, divisor: Double): Option[Double] = 
+  if (divisor == 0) None else Some(divident / divisor)
+```
+
+???
+
+- This is only a problem for strong-typed langauge
+- divide is a partial function, which is a function that make some assumptions
+about its inputs that are not implied by the input type
+- throwing exceptions breaks referential transparency
+
+---
+template:why-use-option
+
+# 3. Work Well w/ Pattern Matching
+
+--
+
+```scala
+// Given this function
+def findMax(xs: List[Int]): Option[Int]
+
+findMax(List(1,3)) // => Some(3)
+findMax(List())    // => None
+
+// How can I write this?
+def findAbsMax(xs: List[Int]): Option[Int]
+
+findAbsMax(List(1,3))   // => Some(3)
+findAbsMax(List(-7,-9)) // => Some(7)
+findAbsMax(List())      // => None
+```
+
+--
+
+```scala
+def findAbsMax(xs: List[Int]): Option[Int] = findMax(xs) match {
+  case Some(x) => Some(math.abs(x))
+  case None => None
+}
+```
+
+???
+
+```scala
+def findMax(xs: List[Int]): Option[Int] = xs match {
+  case head :: tail => {
+    val res = findMax(tail) match {
+      case Some(tail_max) => math.max(head, tail_max)
+      case None => head 
+    }
+    Some(res)
+  }
+  case Nil => None
+}
+```
+
+---
+template:why-use-option
+layout:true
+
+# 4. Work Even Better w/ Higher-order Function
+
+---
+
+```scala
+List(List(0,1,2), List(3,4,5)).flatMap(x => x) // => ???
+List(List(1), List(), List(2)).flatMap(x => x) // => ???
+```
+
+--
+
+```scala
+List(List(0,1,2), List(3,4,5)).flatMap(x => x) // => List(0,1,2,3,4,5)
+List(List(1), List(), List(2)).flatMap(x => x) // => List(1,2)
+```
+
+---
+
+```scala
+List( List(1), List(), List(2) ).flatMap(x => x) // => List(1,2)
+List( Some(1), None,   Some(2) ).flatMap(x => x) // => ???
+```
+
+--
+
+```scala
+List( List(1), List(), List(2) ).flatMap(x => x) // => List(1,2)
+List( Some(1), None,   Some(2) ).flatMap(x => x) // => List(1,2)
+```
+
+--
+
+**Takeaway**: You can basically treat **Some** as a List that contains exactly one
+element and **None** as a empty List
+
+---
+
+Given this new understanding, let's rewrite this
+
+```scala
+def findAbsMax(xs: List[Int]): Option[Int] = findMax(xs) match {
+  case Some(x) => Some(math.abs(x))
+  case None => None
+}
+```
+
+--
+
+```scala
+def findAbsMax(xs: List[Int]): Option[Int] = findMax(xs).map(math.abs)
+```
+
+--
+
+Here is a side-by-side comparison w/ List
+
+```scala
+List(-3).map(math.abs) // => List(3)
+List().map(math.abs)   // => List()
+
+Some(-3).map(math.abs) // => Some(3)
+None.map(math.abs)     // => None
+```
+
+---
+template:why-use-option
+layout:true
+
+# 5. Take advantage of FOR Expression
+
+---
+
+Let's continue the **List** vs **Option** analogy.
+
+```scala
+val list = List(List(1), List(), List(2))
+
+list.flatMap(x => x.map(_*2)) 
+// => List(2,4)
+
+for (sublist <- list; item <- sublist) yield (item * 2)
+// => List(2,4)
+```
+
+--
+
+
+```scala
+val list = List(Some(1), None, Some(2))
+
+list.flatMap(option => option.map(_*2)) 
+// => List(2,4)
+
+for (option <- list; item <- option) yield (item * 2)
+// => List(2,4)
+```
+
+---
+
+Here is another more complicated example
+
+```scala
+// Given this function
+def parseInt(value: String): Option[Int] = { /* ... */ }
+
+parseInt("1")  // => Some(1)
+parseInt("x")  // => None
+parseInt(null) // => None
+
+// Write function f so that 
+f(List("1", "x", "21", null)) // => List("2", "42")
+```
+
+--
+
+```scala
+def f(list: List[String]): List[String] = for {
+  item <- list
+  number <- parseInt(item)
+} yield (number*2).toString
+```
