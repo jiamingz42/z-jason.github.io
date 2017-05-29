@@ -1,0 +1,826 @@
+---
+layout: presentation
+title: Loop Like a Functional Programing native
+updated_at: 2017-03-22
+type: slide
+excerpt: TODO
+---
+class: center, middle
+
+# {{page.title}}
+
+Jiaming Zhang
+
+{{page.updated_at}}
+
+---
+
+# Recap: FP Principles
+
+- Treat computation as the evaluation of math functions
+  - Prefer expression over statement
+  - Prefer recursion over iteration
+- Pure Function
+  - No side effect
+  - Same Input -> Same Output
+- Higher-order Function
+- Avoid Mutation
+
+---
+class: center, middle
+
+# Why talk about loop?
+
+???
+
+- Loop can be a concrete example that help u understand those principles
+- Loop is the most commonly used operation
+- Loop is used very different in imperative and functional programing
+   - It's almost certain that a for/while loop is not pure (TODO: show example)
+   - For a programer who used to imperative programing, it's to change how we
+   write loop
+
+---
+class: scala-tutorial
+
+## Scala Tutorial
+
+# List
+
+A class for **immutable** linked list
+
+```scala
+val list = List(1, 2, 3)
+
+list.head // => 1
+list.tail // => List(2, 3)
+
+0 :: list 
+// => List(0,1,2,3)
+
+0 :: 1 :: Nil
+// => List(0,1)
+
+List(1,2) ++ List(3,4)
+// => List(1,2,3,4)
+```
+
+.footnote[
+  [Scala Documentation - List](https://www.scala-lang.org/api/current/scala/collection/immutable/List.html)
+]
+
+---
+class: scala-tutorial
+name:scala-tutorial-stream
+
+## Scala Tutorial
+
+# Stream
+
+{% raw %}
+{{content}}
+{% endraw %}
+
+.footnote[
+  [Scala Documentation - Stream](https://www.scala-lang.org/docu/files/collections-api/collections_14.html)
+]
+
+--
+template:scala-tutorial-stream
+
+A Stream is like a list except that its elements are computed `lazily`.
+
+```scala
+// Stream is similar to list
+
+val stream = Stream(1, 2, 3)
+
+stream.head // => 1
+stream.tail // => Stream(2, 3)
+
+0 #:: stream 
+// => Stream(0,1,2,3)
+
+0 #:: 1 #:: Stream.Empty
+// => Stream(0,1)
+
+Stream(1,2) ++ Stream(3,4)
+// => Stream(1,2,3,4)
+```
+
+---
+template:scala-tutorial-stream
+
+```scala
+// Stream is the lazy version of List
+
+def foo: Int = {
+  println("I am called")
+  42
+}
+
+val list = 0 :: foo :: Nil
+// => print "I am called"
+
+val stream = 0 #:: foo #:: Stream.Empty
+// => print nothing
+
+stream.tail
+// => print "I am called"
+// => return Stream(42)
+```
+
+---
+class: scala-tutorial
+name:scala-tutorial-pattern-match
+
+## Scala Tutorial
+
+# Pattern Match
+
+{% raw %}
+{{content}}
+{% endraw %}
+
+.footnote[
+  [Playing with Scala’s pattern matching](http://bit.ly/2nATKmA)
+]
+
+---
+template:scala-tutorial-pattern-match
+
+It can match constant just as `switch ... case ...` in Java
+
+```scala
+def getNumAsWord(n: Int): String = n match {
+  case 1 => "One"
+  case 2 => "Two"
+  case _ => "Neither One Nor Two"
+}
+
+getNumAsWord(1)  // => "One"
+getNumAsWord(2)  // => "Two"
+getNumAsWord(42) // => "Neither One Nor Two"
+```
+
+---
+template:scala-tutorial-pattern-match
+name:scala-tutorial-pattern-match-2
+
+It can also unpack some structured data (e.g. tuple, case class, list)
+
+---
+template:scala-tutorial-pattern-match-2
+
+```scala
+// create type alias Person
+type Person = (String, Int)
+
+def AskAge(person: Person) = person match { 
+  case ("Fibonacci", _) => "Fibonacci don't want to talk about his age"
+  case (name, age) => s"$name is $age years old" 
+}
+```
+
+--
+
+```scala
+AskAge(("Martin", 58))
+// => "Martin is 58 years old"
+
+AskAge(("Fibonacci", 842))
+// => "Fibonacci don't want to talk about his age"
+```
+
+---
+template:scala-tutorial-pattern-match-2
+
+```scala
+// case class is like Struct in other languages
+case class Person(name: String, age: Int)
+
+def AskAge(person: Person) = person match { 
+  case Person("Fibonacci", _) => "Fibonacci don't want to talk about his age"
+  case Person(name, age) => s"$name is $age years old" 
+}
+```
+--
+
+```scala
+AskAge(Person("Martin", 58))
+// => "Martin is 58 years old"
+
+AskAge(Person("Fibonacci", 842))
+// => "Fibonacci don't want to talk about his age"
+```
+
+---
+template:scala-tutorial-pattern-match-2
+
+```scala
+// List can be used as a case class
+def head[T](list: List[T]): T = list match {
+  case List(head, tail) => head
+  case Nil => throw new java.util.NoSuchElementException
+}
+```
+
+--
+
+```scala
+// `head :: tail` is equivalent to `List(head, tail)`
+def head[T](list: List[T]): Option[T] = list match {
+  case head :: tail => head
+  case Nil => throw new java.util.NoSuchElementException
+}
+```
+
+--
+
+```scala
+head(List(1,2)) // => Some(1)
+head(List())    // => None
+```
+
+---
+template:scala-tutorial-pattern-match
+
+Here is an example of how you can use pattern matching to deal w/ different
+subtypes
+
+```scala
+sealed trait Tree
+case class Branch(v: Int, left: Tree, right: Tree) extends Tree
+case class Leaf(v: Int) extends Tree
+
+def sum(t: Tree): Int = t match {
+  case Branch(v, left, right) => v + sum(left) + sum(right)
+  case Leaf(v) => v
+}
+
+val tree1 : Tree = Branch(1, Leaf(1), Leaf(2))
+val tree2 : Tree = Branch(1, Branch(1, Leaf(1), Leaf(2)), Leaf(2))
+
+sum(tree2) // => 7
+sum(tree1) // => 4
+```
+
+---
+template:scala-tutorial-pattern-match
+
+Sometime we want to perform diff operation based on the object type. Here is the
+comparison between doing this via pattern match and via Java's `instanceof`
+method.
+
+```scala
+// Compiler will complain before Integer does not have method `toChar`
+def f(x: Any): String = x match {
+  case i: Int => "Integer: " + i.toChar(0)
+  case s: String => "String: " + s
+  case _ => "Unknown Input"
+}
+```
+
+```java
+// Compiler won't complain and exception will raise at run-time
+public String f(Object x) {
+  if (x instanceof Integer) {
+    return "Integer: " + i.charAt(0)
+  } 
+  // .....
+}
+```
+
+---
+layout: true
+
+# Use Recursion
+
+---
+
+**Question:** Define the factorial function `fact(n)`, given `n >= 0`
+
+--
+
+```scala
+// Imperative
+def fact(n: Int): Int = {
+  var res = 1
+  for(i <- 1 to n) {
+    res *= i
+  }
+  return res
+}
+```
+
+--
+
+```scala
+// Functional
+def fact(n: Int): Int = 
+  if (n == 0) 1 
+  else n * fact(n-1)
+```
+
+---
+
+.list-topic[
+**Why Recursion?**
+]
+
+0. Easy to understand
+0. Easy to prove its correctness
+
+--
+
+```scala
+def fact(n: Int): Int = 
+  if (n == 0) 1 
+  else n * fact(n-1)
+```
+
+--
+
+Simply a function call using substitution
+
+```txt
+fact(3) = if (3 == 0) 1 else 3 * fact(3-1)
+        = 3 * fact(2)
+        = 3 * (if (2 == 0) 1 else 2 * fact(2-1))
+        = ...
+        = 3 * 2 * 1 * 1
+```
+---
+
+**Question:** Find the length of a list using recursion
+
+--
+
+```scala
+def length[T](list: List[T]): Int = list match {
+  case Nil => 0
+  case head :: tail => 1 + length(tail)
+}
+```
+
+--
+
+```scala
+length(List()) // => 0
+length(List(1,2)) // => 2
+```
+
+--
+
+However, there is a performance issue w/ this function.
+
+--
+
+```scala
+val bigList = (1 to 40000).toList
+
+length(bigList)
+// => throw java.lang.StackOverflowError
+```
+
+---
+layout: true
+
+# Use Tail Recursion
+
+---
+
+**Question:** Define the factorial function `fact(n)`, given `n >= 0`
+
+--
+
+```scala
+import scala.annotation.tailrec
+
+def fact(n: Int): Int = {
+  // @tailrec does not gurantee tail recursion
+  //  it simply raise an exception when there is not
+  @tailrec 
+  def factHelper(n: Int, acc: Int): Int = 
+    if (n == 0) acc
+    else factHelper(n-1, acc * n)
+
+  factHelper(n, 1)
+}
+```
+
+
+???
+
+# In most cases, we need to have such local helper function to support tail recursion
+# Is there an easy way - use higher order function (which will be discuss later)
+
+NOTE: Scala ONLY return tail recursion for self-call recursion
+
+```scala
+// This does not use tail recursion
+def foo(x: Int): Int = bar(x)
+```
+
+---
+
+**Question:** Find the length of a list using tail recursion
+
+--
+
+```scala
+def length[T](list: List[T]): Int = {
+  def lengthHelper(list: List[T], acc: Int): Int = list match {
+    case Nil => acc
+    case head :: tail => lengthHelper(tail, acc+1)
+  }
+  lengthHelper(list, 0)
+}
+```
+
+--
+
+```scala
+length((1 to 40000).toList)
+// => 40000
+```
+
+---
+
+layout: true
+
+# Use Higher-order Function
+
+---
+
+**Question:** Define the factorial function `fact(n)`, given `n >= 0`
+
+--
+
+```scala
+def fact(n: Int): Int = 
+  (1 to n).fold(1) { (acc, x) => acc * x  }
+
+// Or a shorter version
+def fact(n: Int): Int = 
+  (1 to n).fold(1) { _ * _ }
+```
+
+---
+
+Common higher-order functions for collections (e.g. array, list) include:
+
+```scala
+(1 to 3).map(x => x * 2)
+// => Vector(2, 4, 6)
+
+(0 to 1).flatMap(x => (0 to 2).map(y => (x,y)))
+// => Vector((0,0), (0,1), (1,0), (1,1), (2,0), (2,1))
+
+(1 to 10).filter(x => isPrime(x))
+// => Vector(2, 3, 5, 7)
+
+(1 to 10).fold(0) { (acc, x) => acc + x }
+// => 55
+```
+
+---
+
+These higher-order functions `recursively` apply certain computation to a collection
+
+```scala
+abstract class List[+T] {
+  def map[U](f: T => U): List[U] = this match {
+    case x :: xs => f(x) :: xs.map(f)
+    case Nil => Nil
+  }
+  
+  def filter(p: T => Boolean): List[T] = this match {
+    case x :: xs => 
+      if (p(x)) x :: xs.filter(p) else xs.filter(p)
+    case Nil => Nil
+  }
+}
+```
+
+--
+
+<hr>
+
+The actual implementation are `different` from this simplied version in order to:
+
+- make them apply to arbitrary collections, not just lists
+- make them tail-recursive on lists
+
+???
+
+# +T mean covariant type (http://bit.ly/2naUo5Q)
+- Some Scala crash course on List
+
+---
+
+name: higher-order-function-question
+
+**Question:** Find the longest word (assume there is ONLY one)
+
+```scala
+val words = List("way", "jam", "complain", "second-hand", "elite")
+
+// Assume this method is given
+def findLongerWord(w1: String, w2: String) = { ... }
+```
+
+---
+template: higher-order-function-question
+
+```scala
+// Tail Recursion
+def findLongestWord(words: List[String]): String = {
+  @tailrec
+  def go(words: List[String], longestWord: String) = words match {
+    case Nil => longestWord
+    case word :: otherWords => go(otherWords, findLongerWord(longestWord, word))
+  }
+  go(words, "")
+}
+```
+
+---
+template: higher-order-function-question
+
+```scala
+// Use Higher-order Function
+def findLongestWord(words: List[String]): String = 
+	words.fold("") { (acc, x) => findLongerWord(acc, x) }
+```
+
+--
+
+```scala
+def findLongestWord(words: List[String]): String = 
+	words.fold("")(findLongerWord) 
+```
+
+---
+name: higher-order-function-question2
+
+**Question:** Get the name of employees
+- who work at a company w/ more than 5 million revenue
+- who work at the marketing department
+
+---
+template: higher-order-function-question2
+
+```scala
+// Here are the data model
+// `case class` is Struct (kind of) in Scala
+case class Employee(name: String)
+case class Department(name: String, employees: List[Employee])
+case class Company(name: String, revenue: BigInt, departments: List[Department])
+
+// Association
+//   A company has many departments
+//   A department has many employees
+```
+
+---
+template: higher-order-function-question2
+
+```scala
+val companies = loadDataFromDatabase()
+
+// Works but not very readable
+val res = companies
+  .filter(company => company.revenue > 5000000)
+  .flatMap(company => 
+    company.departments.
+      filter(d => d.name == "marketing").
+      flatMap(d => d.employees.map(e => e.name))
+  )
+```
+
+---
+template: higher-order-function-question2
+
+```scala
+// Easier to read but
+//   this helper function is too specific to be reused
+def getMarketingEmployeeName(company: Company): List[String] = {
+   company.departments.
+     filter(d => d.name == "marketing").
+     flatMap(d => d.employees.map(e => e.name))
+}
+
+val res = companies
+  .filter(company => company.revenue > 5000000)
+  .flatMap(company => getMarketingEmployeeName(company))
+```
+
+---
+template: higher-order-function-question2
+
+```scala
+// More readable but less efficient - 
+//  create unnecessary intermediate result
+val res = companies
+  .filter(c => c.revenue > 5000000)
+  .flatMap(c => c.departments)
+  .filter(d => d.name == "marketing")
+  .flatMap(d => d.employees)
+  .map(e => e.name)
+```
+
+---
+template: higher-order-function-question2
+
+```scala
+// As efficient as the 1st/2nd one and
+//  as readable as the 3rd one
+for {
+  c <- companies
+  if c.revenue > 5000000
+  d <- c.departments
+  if d.name == "marketing"
+  e <- d.employees
+} yield e.name
+```
+
+--
+
+For expression will be converted into a set of `map`, `flatMap`, `withFilter` (or
+`filter`) operations.
+
+---
+class: center, middle
+layout:false
+ 
+NOTE: Skip **Lazy Evaluation and Infinite List** if prev section takes too long
+
+---
+
+layout: true
+
+# Lazy Evaluation and Infinite List
+
+---
+name: lazy-eval-question
+
+**Question:** Find nth prime number
+
+```scala
+nthPrime(0) // => 2
+nthPrime(1) // => 3
+nthPrime(5) // => 13
+```
+
+---
+template: lazy-eval-question
+
+
+```scala
+// Imperative
+// This solution is error-prone
+def nthPrime(n: Int): Int = {
+  var k = 2
+  var counter = 0
+
+  while (counter < n) {
+    k += 1
+    if (isPrime(k)) { counter += 1 }
+  }
+  k
+}
+```
+
+---
+template: lazy-eval-question
+
+```scala
+// Use higher-order function
+def nthPrime(n: Int, upperBound: Int): Int = {
+  (1 to upperBound).filter(isPrime)(n)
+}
+```
+
+---
+template: lazy-eval-question
+
+**But ... how do we know the value of `upperBound`**
+
+--
+
+```scala
+// `upperBound` is too small => exception
+nthPrime(50, 100)
+
+// `upperBound` is too large => run forever
+nthPrime(50, Int.MaxValue) 
+
+// `upperBound` has the perfect value, which will be the answer itself
+nthPrime(50, 229) 
+```
+
+???
+
+```scala
+import scala.math.sqrt
+
+// Assume n is positive integer
+def isPrime(n: Int): Boolean = {
+  if (n == 1) false
+  else if (n == 2) true
+  else ! (2 to sqrt(n).toInt).exists(n % _ == 0)
+}
+```
+
+---
+template: lazy-eval-question
+
+```scala
+// http://stackoverflow.com/questions/13206552/scala-rangex-int-maxvalue-vs-stream-fromx
+// Use Stream for Lazy Evaluation
+def nthPrime(n: Int): Int = primeNums(n)
+
+// A stream of prime number
+def primeNums: Stream[Int] = 
+  Stream.from(2).filter(isPrime)
+
+primeNums.take(3)        // => Stream(2, ?)
+primeNums.take(3).toList // => List(2,3,5)
+```
+---
+
+**Question:** Get the nth fib number
+
+```scala
+// Assume n > 0
+def fib(n: Int): Int = {
+  if (n == 0) 1
+  else if (n == 1) 1
+  else fib(n-1) + fib(n-2)
+}
+```
+
+```scala
+def fib(n: Int): Int = {
+  def fibNums(n1: Int, n2: Int): Stream[Int] = {
+    n1 #:: fibNums(n2, n1+ n2)
+  }
+  fibNums(1, 1)(n)
+}
+```
+
+---
+
+**Question:** Create the prime number sequence using Sieve of Eratosthenes
+
+```scala
+def sieve(s: Stream[Int]): Stream[Int] =
+  s.head #:: sieve(s.tail filter (_ % s.head != 0))
+
+val primes = sieve(Stream.from(2))
+
+primes.take(5).toList
+// => List(2, 3, 5, 7, 11)
+```
+
+---
+
+**Question:** How to implement `sqrt` method recursively
+
+```scala
+def sqrtStream(x: Double): Stream[Double] = {
+  def improve(guess: Double) = (guess + x / guess) / 2
+  // TODO: What if no `lazy`
+  lazy val guesses: Stream[Double] = 1 #:: (guesses map improve)
+  guesses
+}
+```
+
+--
+
+```scala
+sqrtStream(4).take(8).toList
+// => List(1.0, 2.5, 2.05, 2.000609756097561, 2.0000000929222947, 2.000000000000002, 2.0, 2.0)
+
+def isGoodEnough(guess: Double, x: Double) = 
+  math.abs((guess * guess - x) / x) < 0.0001
+
+sqrtStream(4).filter(isGoodEnough(_, 4)).take(1).head
+// => 2.0000000929222947
+```
+
+.footnote[
+  [Coursera: Functional Programing Design in Scala](http://bit.ly/2mGqp5k)
+]
+
+---
+layout: false
+
+# Summary
+
+Here are the Functional Programing approaches that replaces the imperative `for` or `while` loop:
+- Recursion
+- Tail Recursion
+- Higher-order Function
+- Lazy Eval and Infinite List

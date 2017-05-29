@@ -1,0 +1,71 @@
+body { font-family: 'Droid Serif'; }
+h1, h2, h3 {
+  font-family: 'Yanone Kaffeesatz';
+  font-weight: normal;
+}
+h1 {
+  margin-top: 10px;
+}
+ol, ul {
+  line-height: 2;
+}
+p {
+  line-height: 1.5;
+}
+hr {
+  border: 1px dashed lightgrey;
+}
+blockquote {
+    border-left: 12px solid rgba(128, 128, 128, 0.40);
+    padding-left: 30px;
+    margin-left: 0px;
+    color: grey;
+    line-height: 1.5;
+}
+.inverse {
+  background: #272822;
+  color: #777872;
+  text-shadow: 0 0 20px #333;
+}
+.red {
+  color: #fa0000
+}
+.remark-code, .remark-inline-code {
+  font-family: 'Ubuntu Mono';
+  background-color: lightyellow;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+.remark-code-line {
+  padding: 2px 0;
+}
+.footnote {
+  position: absolute;
+  bottom: 0em;
+  color: #4b8b8b;
+}
+.footnote a {
+  text-decoration: none;
+}
+a {
+  text-decoration: none;
+  color: #4b8b8b;
+
+}
+
+.scala-tutorial {
+  background: #e2d7b6;
+}
+.scala-tutorial h1 {
+  margin-top: 5px;
+  margin-bottom: 0px;
+  font-weight: bold;
+}
+.scala-tutorial h2 {
+  font-size: 35px;
+  margin-bottom: 0px;
+}
+
+.list-topic p {
+  margin-bottom: 0px
+}

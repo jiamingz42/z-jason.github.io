@@ -1,0 +1,452 @@
+---
+layout: presentation
+title: A Few Function Programing Principles Every Engineer Should Know
+updated_at: 2017-03-01
+type: slide
+excerpt: TODO
+tags:
+- function programing
+---
+class: center, middle
+
+# {{page.title}}
+
+Jiaming Zhang
+
+{{page.updated_at}}
+
+---
+
+# Agenda
+
+- ### Scope
+- ### What's Functional Programing?
+- ### Functional Programing Principles
+- ### Reference/Reading
+
+---
+
+# Scope
+
+These won't be covered in this section (but already on my radar!)
+
+- FP Language
+- FP Design Pattern
+- FP Data Structures
+- FP w/ OOP
+- Success Stories
+
+???
+
+FP Language
+- Stickly speaking, there is not such a thing as FP language.
+  However, some language works better w/ FP paradian
+- Some very silly example about Haskell but focus will be on the FP principles
+
+FP Data Structures
+- Persistent Data Structure
+
+Sucess Stories
+- [Facebook Blog - Fighting spam with Haskell](https://code.facebook.com/posts/745068642270222/fighting-spam-with-haskell/)
+- [Engineer-to-Engineer Talk: How and Why Twitter Uses Scala](https://www.redfin.com/blog/2010/05/how_and_why_twitter_uses_scala.html)
+- [Cognitec - Success Stories for using Clojure](http://cognitect.com/clojure#successstories)
+
+---
+
+# What's Functional Programing?
+
+> In computer science, functional programming is **a programming paradigm** 
+  that treats computation as the evaluation of mathematical functions and avoids
+  changing-state and mutable data. [1]
+
+.footnote[[1] [Wikipedia - Functional Programining](https://en.wikipedia.org/wiki/Functional_programming)]
+
+???
+
+- FP has its origins in lambda calculus ...
+- FP is a programing paradign, rooted in math, lang-independent
+
+---
+
+# What's Functional Programing?
+
+**What's programing paradigm?**
+
+A style of building the structure and elements of computer programs. Common paradiagm includes [1]:
+- Imperative
+- Declarative
+- Object-oriented
+- Functional
+
+Note: Paradigm can overlap or can be used w/ each other.
+
+.footnote[[1] [Definition of Programing Paradigms](http://cs.lmu.edu/~ray/notes/paradigms/)]
+
+???
+
+A programming paradigm is a style or “way” of programming. Some languages make
+it easy to write in some paradigms but not others.
+
+1. different language is design based on different paradigm and 
+2. some principles require the language to implement certain feature. (Go back and talk about these later)
+
+---
+
+# FP Principles
+
+- Treat computation as the evaluation of math functions
+- Pure Function
+- High-order Function (or Functor)
+- Avoid Mutation
+- ...
+
+---
+name: template-fp-principles
+layout: true
+
+## FP Principles
+
+---
+template: template-fp-principles
+
+# Treat computation as the<br>evaluation of math functions
+
+A math function maps a set of input to a set of output.
+
+![abs](./imgs/abs.png)
+
+???
+
+Write the math representation of abs on whiteboard
+
+---
+
+# Treat computation as the<br>evaluation of math functions
+
+FP usually prefers expression over statement
+
+```python
+# Assume val is int
+
+# Statement
+def abs1(val):
+  if val < 0:
+    return -val
+  else:
+    return val
+  
+# Expression
+def abs2(val):
+  return -val if val < 0 else val
+```
+
+---
+
+# Treat computation as the<br>evaluation of math functions
+
+An equivalent Haskell example
+
+--
+
+```haskell
+abs :: Int -> Int
+abs val
+   | val < 0   = -val
+   | otherwise = val
+```
+
+---
+
+# Treat computation as the<br>evaluation of math functions
+
+FP usually prefers recursion over iteration
+
+```python
+# Iteration - Procedural Style
+def sum1(nums):
+  total = 0
+  for num in nums:
+    total += num
+  return total
+
+# Recursion - Functional Style
+def sum2(nums):
+   # Not very efficient in Python but you got the idea
+   return 0 if len(nums) == 0 else nums[0] + sum2(nums[1:])
+```
+
+---
+
+# Treat computation as the<br>evaluation of math functions
+
+An equivalent Haskell example
+
+```haskell
+sum :: [Int] -> Int
+sum nums = case nums of
+  [] -> 0
+  x:xs -> x + sum2 xs
+```
+
+---
+
+# Pure Function
+
+1. No side effect
+2. Same input, same output
+
+---
+
+# Pure Function
+
+**#1 No side effect**
+
+Example of Function w/ Site Effect
+
+--
+
+```python
+def sayhi(name)
+  print("Hi there, my name is %s" % name)
+
+def write_to_file(file, text):
+  with open(file, 'w+') as f:
+    f.write(text)
+
+def sort_nums(nums):
+  nums.sort() # inplace sort 
+  return nums
+```
+
+???
+
+No side effect = no observable changes (e.g. print, save to db)
+
+---
+
+# Pure Function
+
+**#1 No side effect**
+
+But why create an app that can't change the "world"?
+
+--
+
+> In practice, applications need to have some side effects. Simon Peyton-Jones,
+  a major contributor to the functional programming language Haskell, said the
+  following: "In the end, any program must manipulate state. A program that has no
+  side effects whatsoever is a kind of black box. All you can tell is that the box
+  gets hotter." The key is to limit side effects, clearly identify them, and avoid 
+  scattering them throughout the code. [1]
+
+.footnote[[1] [Why are side-effects considered evil in functional programming?](
+  http://softwareengineering.stackexchange.com/questions/15269/why-are-side-effects-considered-evil-in-functional-programming)]
+
+???
+
+- Think about a space capsule in a unpure universe
+- Haskell I/O -> [Monad](https://www.youtube.com/watch?v=dkZFtimgAcM&feature=youtu.be&t=22s)
+
+---
+
+# Pure Function
+
+**#2 Same input, same output**
+
+Example of Function that Violates this
+
+--
+
+```javascript
+gloabl_counter = 0
+
+function foo(x){
+  gloabl_counter += 1;
+  return gloabl_counter + x;
+}
+
+foo(1) // => 2
+foo(1) // => 3
+```
+--
+
+Other examples?
+
+???
+
+- Here are examples that violate this:
+  - Functions that rely on global state (regardless whether it is mutable)
+  - Functions that reply on mutable internal state
+  - Call by reference - the input parameter reference does not change but the actually value change
+
+Is it a random function possible in pure FP language?
+https://www.schoolofhaskell.com/school/starting-with-haskell/libraries-and-frameworks/randoms
+
+---
+
+# High-order Function (or Functor)
+
+1. Take at least one function as input or 
+2. Return a function
+
+---
+
+# High-order Function (or Functor)
+
+**Example: A function that takes another function as input**
+
+```python
+nums = [1,2,3]
+
+map(lambda x: x*2, nums)
+# => [2,4,6]
+
+filter(lambda x: x % 2 == 0, nums)
+# => [2]
+
+reduce(lambda total, num: total * num, nums)
+# => 6
+```
+
+???
+
+Use Python to show example as everyone is familiar w/ it.
+However, Python does not work well w/ FP
+
+---
+
+# High-order Function (or Functor)
+
+**Example: A function that returns a function as output**
+
+```python
+dirs = ['lib', 'bin', 'log']
+
+# `functools` is a built-in Python module
+# `functools.partial` return a partial-applied func
+func = functools.partial(os.path.join, '/User/jason')
+
+map(func, dirs)
+# => ['/User/jason/lib', '/User/jason/bin', '/User/jason/log']
+```
+
+---
+
+# High-order Function (or Functor)
+
+Q: Can you do this w/ just lambda?
+
+--
+
+```python
+map(lambda dirname: os.path.join('/User/jason', dirname), dirs)
+# => ['/User/jason/lib', '/User/jason/bin', '/User/jason/log']
+```
+
+---
+
+# High-order Function (or Functor)
+
+Another Example -- **Compose**
+
+```python
+def compose(f, g):
+  def composed_func(val):
+    return g(f(val))
+  return composed_func
+```
+
+--
+
+```python
+dirname = '~/lib/../log' 
+
+os.path.abspath(os.path.expanduser(dirname))
+# => /Users/jiamingz/log
+
+expandpath = compose(os.path.expanduser, os.path.abspath)
+expandpath(dirname)
+expandpath('~/lib/python/..')
+```
+
+---
+
+# High-order Function (or Functor)
+
+**Compose** is a common high-order function in FP lang
+
+--
+
+```haskell
+add5 :: Int -> Int
+add5 x = 5 + x
+
+mul5 :: Int -> Int
+mul5 x = 5 * x
+
+mul5_and_add5 :: Int -> Int
+mul5_and_add5 = add5 . mul5
+```
+
+
+---
+
+# Avoid Mutation
+
+`[1,2,3]` -> `[1,2,42]`
+
+--
+
+**Example: Mutation**
+```python
+def change(arr, idx, new_val):
+  arr[idx] = new_val
+  return arr
+```
+--
+
+**Example: No Mutation**
+
+```python
+def change(arr, idx, new_val):
+  return arr[:idx] + [new_val] + arr[idx+1:]
+
+change([1,2,3], 2, 42)
+# => [1,2,42]
+```
+
+???
+
+Related to the **Pure Function** principle
+
+---
+
+# Avoid Mutation
+
+Wait ... what about the efficiency? 
+
+--
+
+**Persistent data structure** 
+
+Not gonna cover to this time. If you're interested, check this 
+[Ideal Hash Tree](http://lampwww.epfl.ch/papers/idealhashtrees.pdf) 
+
+---
+layout: true
+---
+
+# Reference/Reading
+
+- [Wikipedia - Functional Programing](https://en.wikipedia.org/wiki/Functional_programming)
+- [Wikipedia - Pure Function](https://en.wikipedia.org/wiki/Pure_function)
+- [Wikipedia - Higher Order Function](https://en.wikipedia.org/wiki/Higher-order_function)
+- [Anjana Vakil: Learning Functional Programming with JavaScript - JSUnconf 2016](
+    https://youtu.be/e-5obm1G_FY)
+- [The Origins of Scala](http://www.artima.com/scalazine/articles/origins_of_scala.html)
+- [Eassy - Why Functional Programing Matters by John Hughes](
+    http://worrydream.com/refs/Hughes-WhyFunctionalProgrammingMatters.pdf)
+- [Youtube - Why Functional Programming Matters by John Hughes at Functional Conf 2016](
+    https://youtu.be/XrNdvWqxBvA)
+
+
