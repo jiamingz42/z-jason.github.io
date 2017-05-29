@@ -5,29 +5,69 @@ excerpt: Slides Index
 permalink: /slides/
 ---
 
+<style>
+    .slides h1 {
+        font-size: 1.4em;
+        margin-bottom: 4px;
+        line-height: 1.6;
+    }
+    .slides .date {
+        font-style: normal;
+        color: grey;
+        font-size: 0.9em;
+        margin-bottom: 4px;
+    }
+    .slides .tags {
+        margin-bottom: 4px;
+    }
+    .slides .tags ul {
+        padding-left: 0px;
+        margin: 0px;
+    }
+    .slides .tags li {
+        font-size: 0.7em;
+        list-style-type: none;
+        text-transform: uppercase;
+        background-color: #a08fd4;
+        float: left;
+        padding: 4px 6px;
+        border-radius: 4px;
+        margin-right: 6px;
+    }
+    .clearfix::after {
+        content: " ";
+        display: block;
+        height: 0;
+        clear: both;
+    }
+</style>
+
 <div class="slides">
     {% for slide in site.slides reversed %}
-        <article class="post">
+        <article class="slide">
 
             <h1><a href="{{ site.baseurl }}{{ slide.url }}">{{ slide.title }}</a></h1>
 
+            {% if slide.tags %}
             <div class="tags">
-                <ul>
+                <ul class="clearfix">
                     {% for tag in slide.tags reversed %}
                         <li>{{ tag }}</li>
                     {% endfor %}
                 </ul>
             </div>
+            {% endif %}
 
-            <div class="updated_at">
-                {{ slide.updated_at }}
+            <div class="date">
+                {{ slide.date | date_to_string }}
             </div>
 
+            {% if slide.excerpt %}
             <div class="entry">
                 {{ slide.excerpt }}
             </div>
+            {% endif %}
 
-            <a href="{{ site.baseurl }}{{ slide.url }}" class="button button-primary">Read More</a>
         </article>
     {% endfor %}
 </div>
