@@ -1,0 +1,33 @@
+---
+layout: default
+title: Slides
+excerpt: Slides Index
+permalink: /slides/
+---
+
+<div class="slides">
+    {% for slide in site.slides reversed %}
+        <article class="post">
+
+            <h1><a href="{{ site.baseurl }}{{ slide.url }}">{{ slide.title }}</a></h1>
+
+            <div class="tags">
+                <ul>
+                    {% for tag in slide.tags reversed %}
+                        <li>{{ tag }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="updated_at">
+                {{ slide.updated_at }}
+            </div>
+
+            <div class="entry">
+                {{ slide.excerpt }}
+            </div>
+
+            <a href="{{ site.baseurl }}{{ slide.url }}" class="button button-primary">Read More</a>
+        </article>
+    {% endfor %}
+</div>
