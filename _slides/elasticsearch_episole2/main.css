@@ -5,9 +5,13 @@ h1, h2, h3 {
 }
 h1 {
   margin-top: 10px;
+  margin-bottom: 15px;
 }
 ol, ul {
   line-height: 2;
+}
+div > ol, div > ul {
+  margin-top: -13px;
 }
 p {
   line-height: 1.5;
@@ -53,16 +57,14 @@ a {
 
 }
 
-.scala-tutorial h1 {
-  margin-top: 5px;
-  margin-bottom: 0px;
-  font-weight: bold;
-}
-.scala-tutorial h2 {
-  font-size: 35px;
-  margin-bottom: 0px;
-}
-
 .list-topic p {
   margin-bottom: 0px
 }
+
+.question {
+  font-weight: bold;
+}
+.answer {
+  color: dimgrey;
+}
+
