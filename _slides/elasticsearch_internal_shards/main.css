@@ -34,6 +34,9 @@ blockquote {
 .red {
   color: #fa0000
 }
+.remark-slide-content h1 {
+  font-size: 50px;
+}
 .remark-code, .remark-inline-code {
   font-family: 'Ubuntu Mono';
   background-color: lightyellow;
